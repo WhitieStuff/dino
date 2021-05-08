@@ -26,7 +26,7 @@ body {
 
 .dino {
     position: absolute;
-    bottom: -16px;
+    bottom: -40px;
     left: 10px;
     width: 110px;
     height: 110px;
@@ -41,6 +41,14 @@ body {
 
 .dino-2 {
     background-image: url(../images/dino-2.png);
+}
+
+.dino-down-1 {
+    background-image: url(../images/dino-down-1.png);
+}
+
+.dino-down-2 {
+    background-image: url(../images/dino-down-2.png);
 }
 
 .current-score {
