@@ -16,34 +16,44 @@
  })
  
  /**
- * Node of the dino itself.
+ * Node of Dino itself.
  */
 let nodeDino = document.getElementById('dino')
 
 /**
  * Node of the current score.
  */
-let nodeCurrentScore = document.getElementById('current-score')
+let nodeCurrentScore = document.getElementById('score_current')
+
+/**
+ * Collection of rocks nodes.
+ */
+let rocks = document.getElementsByClassName('rock')
 
 /**
  * Time for the interval.
  */
-let speedInterval = 100
+let intervalSpeed
 
 /**
  * True if the game is started.
  */
- let isGameStarted = false
+ let isGameStarted
 
 /**
- * True if the dino is in jump.
+ * True if Dino is in jump.
  */
- let isInJump = false
+ let isInJump
 
 /**
- * True if the dino is squating.
+ * True if Dino is squating.
  */
-let isSquating = false
+let isSquating
+
+/**
+ * Length of the current rock so no new rock spawns.
+ */
+let currentRockLength
 
 /**
  * Score in the current game.
@@ -53,16 +63,22 @@ let score = 0
 /**
  * Intervals.
  */
-let intervalDinoAnimation, intervalScores, jumpInterval, squatInterval
+let intervalDinoAnimation, intervalScores, jumpInterval, squatInterval, groundInterval
 
 /**
  * Starts a new game.
  */
 function startNewGame() {
     isGameStarted = true
+    isInJump = false
+    isSquating = false
+    currentRockLength = 0
+    
+    intervalSpeed = 12
     nodeDino.classList.add('dino-1')
     intervalDinoAnimation = setInterval(animateDino, 100)
     intervalScores = setInterval(runScore, 100)
+    groundScores = setInterval(runGround, intervalSpeed)
 }
 
 function animateDino() {
@@ -71,6 +87,9 @@ function animateDino() {
 
 }
 
+/**
+ * Runs the score counter.
+ */
 function runScore() {
     let fullScore = ++score
     while (fullScore.toString().length < 5) {
@@ -79,6 +98,9 @@ function runScore() {
     nodeCurrentScore.innerHTML = fullScore
 }
 
+/**
+ * Makes Dino jump.
+ */
 function jump() {
     if (isInJump) return
     isInJump = true
@@ -103,6 +125,10 @@ function jump() {
     }, 10)
 }
 
+
+/**
+ * Makes Dino squat.
+ */
 function squat() {
 
     if (isInJump) {
@@ -129,6 +155,9 @@ function squat() {
 
 }
 
+/**
+ * Makes Dino unsquat.
+ */
 function unsquat() {
     isSquating = false
     nodeDino.classList.remove('dino-down-1')
@@ -137,7 +166,66 @@ function unsquat() {
     
 }
 
+/**
+ * Moves the ground under Dino.
+ * Being called with an interval.
+ */
+function runGround() {
+    spawnRandomGround()
+    // for (let i = 0; i < rocks.length; i++) moveRock(rocks[i])
+}
+
+/**
+ * Spawns a random rock on the ground.
+ */
+function spawnRandomGround() {
+    if (currentRockLength-- > 0) return
+    let rockWidth = getRandom(10)
+    let rockHeight = getRandom(3)
+    let rockBottom = getRandom(18) + 10
+    let newGroundNode = document.createElement('div')
+    newGroundNode.classList.add('rock')
+
+    currentRockLength = rockWidth
+
+    nodeMain.appendChild(newGroundNode)
+    newGroundNode.style.width = `${rockWidth}px`
+    newGroundNode.style.height = `${rockHeight}px`
+    newGroundNode.style.bottom = `-${rockBottom}px`
+    let rockInterval = setInterval(() => {
+        moveRock(newGroundNode)
+    }, intervalSpeed)
+}
+
+/**
+ * Moves the given rock to the left on the ground.
+ * @param {Element} rock A rock to move left. 
+ */
+function moveRock(rock) {
+    let left = parseInt(getComputedStyle(rock).left.slice(0, -2))
+    let right = parseInt(getComputedStyle(rock).right.slice(0, -2)) + 10
+    rock.style.right = `${right}px`
+
+    if (left < 10) nodeMain.removeChild(rock)
+}
+
+/**
+ * Returns random integer value from 1 to *max*.
+ * @param {number} max Max random value. 
+ * @returns {number} Random value.
+ */
+function getRandom(max) {
+    return Math.floor(Math.random() * (max - 1)) + 1
+}
+
+
+/**
+ * Ends the game.
+ */
 function endGame() {
     clearInterval(intervalDinoAnimation)
     clearInterval(intervalScores)
+    clearInterval(jumpInterval)
+    clearInterval(squatInterval)
+    clearInterval(groundInterval)
 }
