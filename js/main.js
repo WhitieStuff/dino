@@ -23,12 +23,17 @@ let nodeDino = document.getElementById('dino')
 /**
  * Node of the current score.
  */
-let nodeCurrentScore = document.getElementById('score_current')
+ let nodeCurrentScore = document.getElementById('score_current')
+
+/**
+ * Node of the ground.
+ */
+let nodeGround = document.getElementById('ground')
 
 /**
  * Collection of rocks nodes.
  */
-let rocks = document.getElementsByClassName('rock')
+ let rocks = document.getElementsByClassName('rock')
 
 /**
  * Time for the interval.
@@ -51,11 +56,6 @@ let intervalSpeed
 let isSquating
 
 /**
- * Length of the current rock so no new rock spawns.
- */
-let currentRockLength
-
-/**
  * Score in the current game.
  */
 let score = 0
@@ -66,6 +66,11 @@ let score = 0
 let intervalDinoAnimation, intervalScores, jumpInterval, squatInterval, groundInterval
 
 /**
+ * If > 0 then spawns a bump-filler instead.
+ */
+let intervalPause
+
+/**
  * Starts a new game.
  */
 function startNewGame() {
@@ -74,7 +79,9 @@ function startNewGame() {
     isSquating = false
     currentRockLength = 0
     
-    intervalSpeed = 12
+    intervalPause = 0
+    intervalSpeed = 6
+    // intervalSpeed = 20
     nodeDino.classList.add('dino-1')
     intervalDinoAnimation = setInterval(animateDino, 100)
     intervalScores = setInterval(runScore, 100)
@@ -106,7 +113,6 @@ function jump() {
     isInJump = true
 
     let dinoPosition = -40
-    let pause = 20
     let movingUp = true
 
     jumpInterval = setInterval(() => {
@@ -172,41 +178,46 @@ function unsquat() {
  */
 function runGround() {
     spawnRandomGround()
-    // for (let i = 0; i < rocks.length; i++) moveRock(rocks[i])
+    for (let i = 0; i < rocks.length; i++) removeRock(rocks[i])
 }
 
 /**
  * Spawns a random rock on the ground.
  */
 function spawnRandomGround() {
-    if (currentRockLength-- > 0) return
+
     let rockWidth = getRandom(10)
     let rockHeight = getRandom(3)
-    let rockBottom = getRandom(18) + 10
+    let rockTop = getRandom(18) + 2
     let newGroundNode = document.createElement('div')
     newGroundNode.classList.add('rock')
-
-    currentRockLength = rockWidth
-
-    nodeMain.appendChild(newGroundNode)
     newGroundNode.style.width = `${rockWidth}px`
     newGroundNode.style.height = `${rockHeight}px`
-    newGroundNode.style.bottom = `-${rockBottom}px`
-    let rockInterval = setInterval(() => {
-        moveRock(newGroundNode)
-    }, intervalSpeed)
+    newGroundNode.style.top = `${rockTop}px`
+    let invisibility = getRandom(20)
+    if (invisibility > 3) newGroundNode.style.visibility = 'hidden'
+
+    if (--intervalPause < 1) {
+        newGroundNode.style.top = `0`
+        newGroundNode.style.height = `3px`
+        newGroundNode.style.visibility = 'visible'
+        newGroundNode.classList.add('bump')
+        let variant = getRandom(2)
+        newGroundNode.classList.add(`bump-${variant}`)
+        intervalPause = getRandom(80) + 100
+    }
+
+    nodeGround.appendChild(newGroundNode)
+
 }
 
 /**
  * Moves the given rock to the left on the ground.
  * @param {Element} rock A rock to move left. 
  */
-function moveRock(rock) {
-    let left = parseInt(getComputedStyle(rock).left.slice(0, -2))
-    let right = parseInt(getComputedStyle(rock).right.slice(0, -2)) + 10
-    rock.style.right = `${right}px`
-
-    if (left < 10) nodeMain.removeChild(rock)
+function removeRock(rock) {
+    let left = parseInt(rock.getBoundingClientRect().left)
+    if (left < -80) nodeGround.removeChild(rock)
 }
 
 /**
@@ -215,7 +226,7 @@ function moveRock(rock) {
  * @returns {number} Random value.
  */
 function getRandom(max) {
-    return Math.floor(Math.random() * (max - 1)) + 1
+    return Math.floor(Math.random() * max) + 1
 }
 
 

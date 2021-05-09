@@ -12,6 +12,7 @@
 
 body {
     background: #f9f9f9;
+    overflow: hidden;
 }
 
 .main {
@@ -65,26 +66,46 @@ body {
     color: #5495c4;
 }
 
-.rock {
+.ground {
     position: absolute;
-    right: 0;
+    right: -100px;
+    bottom: -23px;
+    height: 20px;
+    width: max-content;
+}
+
+.rock {
+    display: inline-block;
+    position: relative;
+    vertical-align: top;
     background-color: #0173c7;
+    width: 5px;
+    height: 4px;
 }
 
 .bump {
-    position: absolute;
-    right: 200px;
-    bottom: -3px;
-    height: 13px;
-    width: 34px;
-    background: #f9f9f9 url(../images/bump.png);
+    display: inline-block;
+    position: relative;
+    height: 4px;
+    width: 5px;
 }
 
-.hole {
-    position: absolute;
-    right: 300px;
-    bottom: -7px;
-    height: 7px;
-    width: 27px;
-    background: #f9f9f9 url(../images/hole.png);
+.bump-1::after {
+    content: "";
+    display: inline-block;
+    position: relative;
+    top: -13px;
+    background: #f9f9f9 url(../images/bump-1.png);
+    height: 18px;
+    width: 80px;
+}
+
+.bump-2::after {
+    content: "";
+    display: inline-block;
+    position: relative;
+    top: -13px;
+    background: #f9f9f9 url(../images/bump-2.png);
+    height: 18px;
+    width: 80px;
 }
