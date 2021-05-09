@@ -128,25 +128,25 @@ function jump() {
     if (isInJump) return
     isInJump = true
 
-    let dinoPosition = -40
+    let dinoPosition = -18
     let movingUp = true
 
     jumpInterval = setInterval(() => {
-        if (movingUp && dinoPosition < 128) return nodeDino.style.bottom = `${dinoPosition += 8}px`
-        if (movingUp && dinoPosition < 148) return nodeDino.style.bottom = `${dinoPosition += 4}px`
-        if (movingUp && dinoPosition < 160) return nodeDino.style.bottom = `${dinoPosition += 2}px`
-        if (movingUp && dinoPosition < 164) return nodeDino.style.bottom = `${dinoPosition++}px`
+        if (movingUp && dinoPosition < 126) return nodeDino.style.bottom = `${dinoPosition += 9}px`
+        if (movingUp && dinoPosition < 144) return nodeDino.style.bottom = `${dinoPosition += 3}px`
+        if (movingUp && dinoPosition < 158) return nodeDino.style.bottom = `${dinoPosition += 2}px`
+        if (movingUp && dinoPosition < 162) return nodeDino.style.bottom = `${dinoPosition++}px`
         movingUp = false
         // if (pause) return pause--
         // if (dinoPosition > 148) return nodeDino.style.bottom = `${dinoPosition -= 2}px`
-        if (dinoPosition > 128) return nodeDino.style.bottom = `${dinoPosition -= 4}px`
-        if (dinoPosition > -40) return nodeDino.style.bottom = `${dinoPosition -= 8}px`
-        if (dinoPosition <= -40) {
-            nodeDino.style.bottom = `-40px`
+        if (dinoPosition > 126) return nodeDino.style.bottom = `${dinoPosition -= 3}px`
+        if (dinoPosition > -18) return nodeDino.style.bottom = `${dinoPosition -= 9}px`
+        if (dinoPosition <= -18) {
+            nodeDino.style.bottom = `-18px`
             isInJump = false
             clearInterval(jumpInterval)
         } 
-    }, 10)
+    }, 5)
 }
 
 
@@ -162,18 +162,18 @@ function squat() {
         let dinoPosition = nodeDino.style.bottom.slice(0, -2)
     
         squatInterval = setInterval(() => {
-            if (dinoPosition <= -12) {
-                nodeDino.style.bottom = `-72px`
+            if (dinoPosition <= -9) {
+                nodeDino.style.bottom = `-50px`
                 isSquating = true
                 nodeDino.classList.add('dino-down-1')
                 return clearInterval(squatInterval)
             }
-            nodeDino.style.bottom = `${dinoPosition -= 12}px`
+            nodeDino.style.bottom = `${dinoPosition -= 9}px`
         }, 10)
 
     } else {
         isSquating = true
-        nodeDino.style.bottom = `-72px`
+        nodeDino.style.bottom = `-50px`
         nodeDino.classList.add('dino-down-1')
     }
 
@@ -186,7 +186,7 @@ function unsquat() {
     isSquating = false
     nodeDino.classList.remove('dino-down-1')
     nodeDino.classList.remove('dino-down-2')
-    nodeDino.style.bottom = `-40px`
+    nodeDino.style.bottom = `-18px`
     
 }
 
