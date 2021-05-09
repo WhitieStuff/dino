@@ -36,6 +36,16 @@ let nodeGround = document.getElementById('ground')
  let rocks = document.getElementsByClassName('rock')
 
 /**
+ * Node of the sky.
+ */
+let nodeSky = document.getElementById('sky')
+
+/**
+ * Collection of clouds nodes.
+ */
+ let clouds = document.getElementsByClassName('sky-piece')
+
+/**
  * Time for the interval.
  */
 let intervalSpeed
@@ -63,12 +73,12 @@ let score = 0
 /**
  * Intervals.
  */
-let intervalDinoAnimation, intervalScores, jumpInterval, squatInterval, groundInterval
+let intervalDinoAnimation, intervalScores, jumpInterval, squatInterval, groundInterval, skyInterval
 
 /**
  * If > 0 then spawns a bump-filler instead.
  */
-let intervalPause
+let intervalPause = 0
 
 /**
  * Starts a new game.
@@ -86,9 +96,15 @@ function startNewGame() {
     intervalDinoAnimation = setInterval(animateDino, 100)
     intervalScores = setInterval(runScore, 100)
     groundScores = setInterval(runGround, intervalSpeed)
+    skyInterval = setInterval(runSky, intervalSpeed*3)
 }
 
 function animateDino() {
+    if (isInJump) {
+        nodeDino.classList.add('dino-still')
+    } else {
+        nodeDino.classList.remove('dino-still')
+    }
     if (isSquating) return nodeDino.classList.toggle('dino-down-2')
     nodeDino.classList.toggle('dino-2')
 
@@ -119,12 +135,14 @@ function jump() {
         if (movingUp && dinoPosition < 128) return nodeDino.style.bottom = `${dinoPosition += 8}px`
         if (movingUp && dinoPosition < 148) return nodeDino.style.bottom = `${dinoPosition += 4}px`
         if (movingUp && dinoPosition < 160) return nodeDino.style.bottom = `${dinoPosition += 2}px`
+        if (movingUp && dinoPosition < 164) return nodeDino.style.bottom = `${dinoPosition++}px`
         movingUp = false
         // if (pause) return pause--
-        if (dinoPosition > 148) return nodeDino.style.bottom = `${dinoPosition -= 2}px`
+        // if (dinoPosition > 148) return nodeDino.style.bottom = `${dinoPosition -= 2}px`
         if (dinoPosition > 128) return nodeDino.style.bottom = `${dinoPosition -= 4}px`
         if (dinoPosition > -40) return nodeDino.style.bottom = `${dinoPosition -= 8}px`
-        if (dinoPosition == -40) {
+        if (dinoPosition <= -40) {
+            nodeDino.style.bottom = `-40px`
             isInJump = false
             clearInterval(jumpInterval)
         } 
@@ -204,7 +222,7 @@ function spawnRandomGround() {
         newGroundNode.classList.add('bump')
         let variant = getRandom(2)
         newGroundNode.classList.add(`bump-${variant}`)
-        intervalPause = getRandom(80) + 100
+        intervalPause = getRandom(240) + 100
     }
 
     nodeGround.appendChild(newGroundNode)
@@ -213,7 +231,7 @@ function spawnRandomGround() {
 
 /**
  * Moves the given rock to the left on the ground.
- * @param {Element} rock A rock to move left. 
+ * @param {Element} rock A rock to remove. 
  */
 function removeRock(rock) {
     let left = parseInt(rock.getBoundingClientRect().left)
@@ -230,6 +248,52 @@ function getRandom(max) {
 }
 
 
+function drawStaticWorld() {
+    let rocks = nodeMain.offsetWidth / 3
+    for (let i = 0; i < rocks; i++) {
+        spawnRandomGround()
+        spawnRandomSky()
+    }
+}
+
+/**
+ * Moves the sky under Dino.
+ * Being called with an interval.
+ */
+function runSky() {
+    spawnRandomSky()
+    for (let i = 0; i < clouds.length; i++) removeCloud(clouds[i])
+}
+
+/**
+ * Spawns a random cloud in the sky.
+ */
+function spawnRandomSky() {
+
+    let cloudTop = getRandom(4) * 20
+    let newSkyNode = document.createElement('div')
+    newSkyNode.classList.add('sky-piece')
+    newSkyNode.style.top = `${cloudTop}px`
+    console.log(intervalPause)
+
+    if (intervalPause == 1 || intervalPause == 51 || intervalPause == 102) {
+        console.log(intervalPause)
+        newSkyNode.classList.add('cloud')
+    }
+
+    nodeSky.appendChild(newSkyNode)
+
+}
+
+/**
+ * Moves the given cloud to the left in the sky.
+ * @param {Element} cloud A cloud to remove. 
+ */
+function removeCloud(cloud) {
+    let left = parseInt(cloud.getBoundingClientRect().left)
+    if (left < -120) nodeSky.removeChild(cloud)
+}
+
 /**
  * Ends the game.
  */
@@ -239,4 +303,7 @@ function endGame() {
     clearInterval(jumpInterval)
     clearInterval(squatInterval)
     clearInterval(groundInterval)
+    clearInterval(skyInterval)
 }
+
+drawStaticWorld()
