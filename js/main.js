@@ -119,14 +119,17 @@ let skipObstacle = 0
  * Starts a new game.
  */
 function startNewGame() {
+    obstacles[0] && nodeGround.removeChild(obstacles[0])
+    nodeDino.style.bottom = `-18px`
+
     isGameStarted = true
+    score = 0
     isInJump = false
     isSquating = false
     currentRockLength = 0
     
     skipRock = skipCloud = skipBump = skipObstacle = 0
     speed = 6
-    // speed = 20
     nodeDino.classList.add('dino-1')
     intervalDinoAnimation = setInterval(animateDino, 100)
     intervalScores = setInterval(runScore, 100)
@@ -146,6 +149,9 @@ function endGame() {
     clearInterval(intervalGround)
     clearInterval(intervalSky)
     clearInterval(intervalBirds)
+    isGameStarted = false
+
+    //TODO: Save highscore.
 }
 
 // ***=== END OF GAME START AND END ===***
@@ -469,29 +475,44 @@ function checkTouch(obstacle) {
     let dinoLeft = 50
     let dinoRight = 133
     let dinoBottom = parseInt(getComputedStyle(nodeDino).bottom.slice(0, -2))
-    let dinoTop = dinoBottom + 88
+    let dinoTop = isSquating ? dinoBottom + 54 : dinoBottom + 88
 
-    // -150 because Dino is moving during the calculation.
+    // This is kind of magic, you better don't touch it. - 150 and -60 because the Dino moves during the calculations.
     let obstacleLeft = parseInt(obstacle.offsetLeft) - 150
-    let obstacleRight = parseInt(getComputedStyle(obstacle, "::after").width.slice(0, -2)) + obstacleLeft
-    let obstacleTop = parseInt(getComputedStyle(obstacle, "::after").height.slice(0, -2)) - 18
+    let obstacleRight = parseInt(getComputedStyle(obstacle, "::after").width.slice(0, -2)) + obstacleLeft - 60
+    let obstacleTop = 0
+    let obstacleBottom = 0
 
-    //FIXME: Right edge.
-    
+    if (isCactus) obstacleTop = parseInt(getComputedStyle(obstacle, "::after").height.slice(0, -2)) - 18
+    if (isBird) {
+        let birdHeight = obstacle.className.includes('bird-2') ? 65 : 57
+        obstacleTop = -parseInt(obstacle.offsetTop) - 50
+        obstacleBottom = -parseInt(obstacle.offsetTop) - birdHeight
+        obstacleRight -= 50
+    }
+
+    // If Dino and the obstacle meet horizontal.
     let isTouchingHorizontal = obstacleLeft <= dinoRight && obstacleRight > dinoLeft ? true : false
+
     let isTouchingVertical = false
 
     if (isTouchingHorizontal) {
-        if (isCactus) {
+        if (isCactus) { 
             isTouchingVertical = obstacleTop > dinoBottom
+            // It's ok if empty edges meet.
+            if (dinoRight - obstacleLeft < 20 || obstacleRight - dinoLeft < 30) {
+                isTouchingVertical = obstacleTop - 40 > dinoBottom + 30
+            }
+        }
+        if (isBird) {
+            isTouchingVertical = dinoTop > obstacleBottom && obstacleTop > dinoBottom ? true : false
+            // It's ok if empty edges meet.
+            if (dinoTop - obstacleBottom < 30 && obstacleRight - dinoLeft < 30) isTouchingVertical = false
         }
     }
 
     let isTouching = isTouchingHorizontal && isTouchingVertical
-    // let obstacle
-    // let right
     if (isTouching) return endGame()
-    // console.log(dinoBottom)
 }
 
 // ***=== END OF OBSTACLES ===***
