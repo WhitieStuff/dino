@@ -76,9 +76,14 @@ let score = 0
 let intervalDinoAnimation, intervalScores, jumpInterval, squatInterval, groundInterval, skyInterval
 
 /**
- * If < 1 then draws a bump.
+ * If < 1 then draws a rock.
  */
  let groundCounter = 0
+
+ /**
+  * If < 1 then spawns a bump.
+  */
+  let bumpCounter = 0
 
  /**
   * If < 1 then spawns a cloud.
@@ -187,21 +192,21 @@ function jump() {
     let movingUp = true
 
     jumpInterval = setInterval(() => {
-        if (movingUp && dinoPosition < 126) return nodeDino.style.bottom = `${dinoPosition += 9}px`
-        if (movingUp && dinoPosition < 144) return nodeDino.style.bottom = `${dinoPosition += 3}px`
-        if (movingUp && dinoPosition < 158) return nodeDino.style.bottom = `${dinoPosition += 2}px`
-        if (movingUp && dinoPosition < 162) return nodeDino.style.bottom = `${dinoPosition++}px`
+        if (movingUp && dinoPosition < 120) return nodeDino.style.bottom = `${dinoPosition += 9}px`
+        if (movingUp && dinoPosition < 168) return nodeDino.style.bottom = `${dinoPosition += 6}px`
+        if (movingUp && dinoPosition < 174) return nodeDino.style.bottom = `${dinoPosition += 2}px`
+        if (movingUp && dinoPosition < 180) return nodeDino.style.bottom = `${dinoPosition++}px`
         movingUp = false
         // if (pause) return pause--
-        // if (dinoPosition > 148) return nodeDino.style.bottom = `${dinoPosition -= 2}px`
-        if (dinoPosition > 126) return nodeDino.style.bottom = `${dinoPosition -= 3}px`
+        if (dinoPosition > 168) return nodeDino.style.bottom = `${dinoPosition -= 2}px`
+        if (dinoPosition > 120) return nodeDino.style.bottom = `${dinoPosition -= 6}px`
         if (dinoPosition > -18) return nodeDino.style.bottom = `${dinoPosition -= 9}px`
         if (dinoPosition <= -18) {
             nodeDino.style.bottom = `-18px`
             isInJump = false
             clearInterval(jumpInterval)
         } 
-    }, 5)
+    }, 10)
 }
 
 /**
@@ -269,9 +274,16 @@ function runGround() {
  * @param {boolean} isStatic Is the ground static so in makes margin-right.
  */
 function spawnRandomGround(isStatic) {
+    // If not static, we need to decrease the initial distanse because the right margin grows when moving. 
+    let distanceRocks = isStatic ? 5 : 2
+    let distanceBumps = isStatic ? 350 : 200
 
-    let probabilityMain = getRandom(20)
-    if (probabilityMain > 5) return
+    // Minimum 5 + 1 to distanceRocks
+    groundCounter = groundCounter == 0 ? getRandom(distanceRocks) + 5 : --groundCounter
+    // Minimum 150 + 1 to distanceBumps
+    bumpCounter = bumpCounter == 0 ? getRandom(distanceBumps) + 100 : --bumpCounter
+
+    if (groundCounter && bumpCounter) return
 
     let rockWidth = getRandom(10)
     let rockHeight = getRandom(3)
@@ -284,12 +296,7 @@ function spawnRandomGround(isStatic) {
     newGroundNode.style.top = `${rockTop}px`
     if (isStatic) newGroundNode.style.marginRight = `${marginRight}px`
 
-    groundCounter = groundCounter > 100 ? 0 : ++groundCounter
-
-    let probability1 = groundCounter == 1 || groundCounter == 80
-    let probability2 = getRandom(10) < 9
-
-    if (probability1 && probability2) {
+    if (!bumpCounter) {
         newGroundNode.style.top = `0`
         newGroundNode.style.height = `3px`
         newGroundNode.style.visibility = 'visible'
@@ -309,7 +316,7 @@ function spawnRandomGround(isStatic) {
  * @param {Element} rock The rock to increase margin. 
  */
 function moveRock(rock) {
-    let newMargin = parseInt(getComputedStyle(rock)['margin-right'].slice(0, -2)) + 5
+    let newMargin = parseInt(getComputedStyle(rock)['margin-right'].slice(0, -2)) + 4
     rock.style['margin-right'] = `${newMargin}px`
 }
 
@@ -347,14 +354,17 @@ function runSky() {
  * @param {boolean} isStatic Is the sky static so in makes margin-right.
  */
 function spawnRandomSky(isStatic) {
-    skyCounter = skyCounter > 200 ? 0 : ++skyCounter
+    // If not static, we need to decrease the initial distanse because the right margin grows when moving. 
+    let distance = isStatic ? 200 : 100
 
-    let probability1 = skyCounter != 1 && skyCounter != 30 && skyCounter != 100 && skyCounter != 180
-    let probability2 = getRandom(10) > 4
+    // Minimum 40 + 1 to distance
+    skyCounter = skyCounter == 0 ? getRandom(distance) + 40 : --skyCounter
 
-    if (probability1 || probability2) return
+    if (skyCounter) return
 
+    // One of the four different lines.
     let cloudTop = getRandom(4) * 20
+    // Minimum 200 + 1 to 400
     let marginRight = getRandom(400) + 200
 
     let newSkyNode = document.createElement('div')
