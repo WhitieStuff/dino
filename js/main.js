@@ -43,7 +43,7 @@ let nodeSky = document.getElementById('sky')
 /**
  * Collection of clouds nodes.
  */
- let clouds = document.getElementsByClassName('sky-piece')
+ let clouds = document.getElementsByClassName('cloud')
 
 /**
  * Time for the interval.
@@ -76,9 +76,19 @@ let score = 0
 let intervalDinoAnimation, intervalScores, jumpInterval, squatInterval, groundInterval, skyInterval
 
 /**
- * If > 0 then spawns a bump-filler instead.
+ * If < 1 then draws a bump.
  */
-let intervalPause = 0
+ let groundCounter = 0
+
+ /**
+  * If < 1 then spawns a cloud.
+  */
+ let skyCounter = 0
+
+
+// *****=====*****
+
+// ***=== START OF GAME START AND END ===***
 
 /**
  * Starts a new game.
@@ -89,14 +99,42 @@ function startNewGame() {
     isSquating = false
     currentRockLength = 0
     
-    intervalPause = 0
+    groundCounter = 0
+    skyCounter = 0
     intervalSpeed = 6
     // intervalSpeed = 20
     nodeDino.classList.add('dino-1')
     intervalDinoAnimation = setInterval(animateDino, 100)
     intervalScores = setInterval(runScore, 100)
     groundScores = setInterval(runGround, intervalSpeed)
-    skyInterval = setInterval(runSky, intervalSpeed*3)
+    skyInterval = setInterval(runSky, intervalSpeed*5)
+}
+
+/**
+ * Ends the game.
+ */
+function endGame() {
+    clearInterval(intervalDinoAnimation)
+    clearInterval(intervalScores)
+    clearInterval(jumpInterval)
+    clearInterval(squatInterval)
+    clearInterval(groundInterval)
+    clearInterval(skyInterval)
+}
+
+// ***=== END OF GAME START AND END ===***
+
+// *****=====*****
+
+// ***=== START OF SERVICE FUNCTIONS ===***
+
+/**
+ * Returns random integer value from 1 to *max*.
+ * @param {number} max Max random value. 
+ * @returns {number} Random value.
+ */
+function getRandom(max) {
+    return Math.floor(Math.random() * max) + 1
 }
 
 function animateDino() {
@@ -119,12 +157,29 @@ function runScore() {
         fullScore = "0" + fullScore
     }
     nodeCurrentScore.innerHTML = fullScore
+
+    //TODO: Increase speed on hundreds.
+    //TODO: Night theme at 700 for next 200.
 }
 
+function drawStaticWorld() {
+    let rocks = nodeMain.offsetWidth / 3
+    for (let i = 0; i < rocks; i++) {
+        spawnRandomGround(true)
+        spawnRandomSky(true)
+    }
+}
+
+// ***=== END OF SERVICE FUNCTIONS ===***
+
+// *****=====*****
+
+// ***=== START OF JUMP AND SQUAT ===***
 /**
  * Makes Dino jump.
  */
 function jump() {
+    //FIXME: Fix jump speed.
     if (isInJump) return
     isInJump = true
 
@@ -148,7 +203,6 @@ function jump() {
         } 
     }, 5)
 }
-
 
 /**
  * Makes Dino squat.
@@ -190,71 +244,89 @@ function unsquat() {
     
 }
 
+// ***=== END OF JUMP AND SQUAT ===***
+
+// *****=====*****
+
+// ***=== START OF GROUND ===***
+
 /**
  * Moves the ground under Dino.
  * Being called with an interval.
  */
 function runGround() {
     spawnRandomGround()
-    for (let i = 0; i < rocks.length; i++) removeRock(rocks[i])
+
+    let firstRock = rocks[0]
+    let lastRock = rocks[rocks.length - 1]
+
+    if (lastRock) moveRock(lastRock)
+    if (firstRock) removeRock(firstRock)
 }
 
 /**
  * Spawns a random rock on the ground.
+ * @param {boolean} isStatic Is the ground static so in makes margin-right.
  */
-function spawnRandomGround() {
+function spawnRandomGround(isStatic) {
+
+    let probabilityMain = getRandom(20)
+    if (probabilityMain > 5) return
 
     let rockWidth = getRandom(10)
     let rockHeight = getRandom(3)
-    let rockTop = getRandom(18) + 2
+    let rockTop = getRandom(18)
+    let marginRight = getRandom(50)
     let newGroundNode = document.createElement('div')
     newGroundNode.classList.add('rock')
     newGroundNode.style.width = `${rockWidth}px`
     newGroundNode.style.height = `${rockHeight}px`
     newGroundNode.style.top = `${rockTop}px`
-    let invisibility = getRandom(20)
-    if (invisibility > 3) newGroundNode.style.visibility = 'hidden'
+    if (isStatic) newGroundNode.style.marginRight = `${marginRight}px`
 
-    if (--intervalPause < 1) {
+    groundCounter = groundCounter > 100 ? 0 : ++groundCounter
+
+    let probability1 = groundCounter == 1 || groundCounter == 80
+    let probability2 = getRandom(10) < 9
+
+    if (probability1 && probability2) {
         newGroundNode.style.top = `0`
         newGroundNode.style.height = `3px`
         newGroundNode.style.visibility = 'visible'
         newGroundNode.classList.add('bump')
         let variant = getRandom(2)
         newGroundNode.classList.add(`bump-${variant}`)
-        intervalPause = getRandom(240) + 100
     }
+
+    //TODO: A separate interval for bumps would be cool.
 
     nodeGround.appendChild(newGroundNode)
 
 }
 
 /**
- * Moves the given rock to the left on the ground.
- * @param {Element} rock A rock to remove. 
+ * Increases the last rock's margin-right so it moves to the left.
+ * @param {Element} rock The rock to increase margin. 
+ */
+function moveRock(rock) {
+    let newMargin = parseInt(getComputedStyle(rock)['margin-right'].slice(0, -2)) + 5
+    rock.style['margin-right'] = `${newMargin}px`
+}
+
+/**
+ * Removes the first rock if it has run out of the screen.
+ * @param {Element} rock The rock to be removed. 
  */
 function removeRock(rock) {
     let left = parseInt(rock.getBoundingClientRect().left)
     if (left < -80) nodeGround.removeChild(rock)
 }
 
-/**
- * Returns random integer value from 1 to *max*.
- * @param {number} max Max random value. 
- * @returns {number} Random value.
- */
-function getRandom(max) {
-    return Math.floor(Math.random() * max) + 1
-}
+// ***=== END OF GROUND ===***
 
+// *****=====*****
 
-function drawStaticWorld() {
-    let rocks = nodeMain.offsetWidth / 3
-    for (let i = 0; i < rocks; i++) {
-        spawnRandomGround()
-        spawnRandomSky()
-    }
-}
+// ***=== START OF SKY ===***
 
 /**
  * Moves the sky under Dino.
@@ -262,27 +334,45 @@ function drawStaticWorld() {
  */
 function runSky() {
     spawnRandomSky()
-    for (let i = 0; i < clouds.length; i++) removeCloud(clouds[i])
+
+    let firstCloud = clouds[0]
+    let lastCloud = clouds[clouds.length - 1]
+
+    if (lastCloud) moveCloud(lastCloud)
+    if (firstCloud) removeCloud(firstCloud)
 }
 
 /**
  * Spawns a random cloud in the sky.
+ * @param {boolean} isStatic Is the sky static so in makes margin-right.
  */
-function spawnRandomSky() {
+function spawnRandomSky(isStatic) {
+    skyCounter = skyCounter > 200 ? 0 : ++skyCounter
+
+    let probability1 = skyCounter != 1 && skyCounter != 30 && skyCounter != 100 && skyCounter != 180
+    let probability2 = getRandom(10) > 4
+
+    if (probability1 || probability2) return
 
     let cloudTop = getRandom(4) * 20
-    let newSkyNode = document.createElement('div')
-    newSkyNode.classList.add('sky-piece')
-    newSkyNode.style.top = `${cloudTop}px`
-    console.log(intervalPause)
+    let marginRight = getRandom(400) + 200
 
-    if (intervalPause == 1 || intervalPause == 51 || intervalPause == 102) {
-        console.log(intervalPause)
-        newSkyNode.classList.add('cloud')
-    }
+    let newSkyNode = document.createElement('div')
+    newSkyNode.classList.add('cloud')
+    newSkyNode.style.top = `${cloudTop}px`
+    if (isStatic) newSkyNode.style.marginRight = `${marginRight}px`
 
     nodeSky.appendChild(newSkyNode)
 
+}
+
+/**
+ * Increases the last cloud's margin-right so it moves to the left.
+ * @param {Element} cloud The cloud to increase margin. 
+ */
+function moveCloud(cloud) {
+    let newMargin = parseInt(getComputedStyle(cloud)['margin-right'].slice(0, -2)) + 5
+    cloud.style.marginRight = `${newMargin}px`
 }
 
 /**
@@ -294,16 +384,11 @@ function removeCloud(cloud) {
     if (left < -120) nodeSky.removeChild(cloud)
 }
 
-/**
- * Ends the game.
- */
-function endGame() {
-    clearInterval(intervalDinoAnimation)
-    clearInterval(intervalScores)
-    clearInterval(jumpInterval)
-    clearInterval(squatInterval)
-    clearInterval(groundInterval)
-    clearInterval(skyInterval)
-}
+// ***=== END OF SKY ===***
+
+// *****=====*****
+
+
+
 
 drawStaticWorld()

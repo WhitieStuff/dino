@@ -79,7 +79,7 @@ body {
 .ground {
     position: absolute;
     right: -100px;
-    bottom: -23px;
+    bottom: -25px;
     height: 20px;
     width: max-content;
 }
@@ -88,6 +88,7 @@ body {
     display: inline-block;
     position: relative;
     vertical-align: top;
+    margin-right: 0;
     background-color: #0173c7;
     width: 5px;
     height: 4px;
@@ -125,7 +126,7 @@ body {
     width: max-content;
 }
 
-.sky-piece {
+.cloud {
     position: relative;
     display: inline-block;
     width: 5px;
