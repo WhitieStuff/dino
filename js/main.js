@@ -33,7 +33,7 @@ let nodeGround = document.getElementById('ground')
 /**
  * Collection of rocks nodes.
  */
- let rocks = document.getElementsByClassName('rock')
+let rocks = document.getElementsByClassName('rock')
 
 /**
  * Node of the sky.
@@ -43,12 +43,22 @@ let nodeSky = document.getElementById('sky')
 /**
  * Collection of clouds nodes.
  */
- let clouds = document.getElementsByClassName('cloud')
+let clouds = document.getElementsByClassName('cloud')
+
+/**
+ * Node of the obstacles line.
+ */
+let nodeObstacles = document.getElementById('obstacles')
+
+/**
+ * Collection of clouds nodes.
+ */
+let obstacles = document.getElementsByClassName('obstacle')
 
 /**
  * Time for the interval.
  */
-let intervalSpeed
+let speed
 
 /**
  * True if the game is started.
@@ -73,22 +83,27 @@ let score = 0
 /**
  * Intervals.
  */
-let intervalDinoAnimation, intervalScores, jumpInterval, squatInterval, groundInterval, skyInterval
+let intervalDinoAnimation, intervalScores, intervalJump, intervalSquat, intervalGround, intervalSky
 
 /**
  * If < 1 then draws a rock.
  */
- let groundCounter = 0
+ let skipRock = 0
 
- /**
-  * If < 1 then spawns a bump.
-  */
-  let bumpCounter = 0
+/**
+ * If < 1 then spawns a bump.
+ */
+let skipBump = 0
 
- /**
-  * If < 1 then spawns a cloud.
-  */
- let skyCounter = 0
+/**
+ * If < 1 then spawns a cloud.
+ */
+let skipCloud = 0
+
+/**
+ * If < 1 then spawns an obstacle.
+ */
+let skipObstacle = 0
 
 
 // *****=====*****
@@ -104,15 +119,14 @@ function startNewGame() {
     isSquating = false
     currentRockLength = 0
     
-    groundCounter = 0
-    skyCounter = 0
-    intervalSpeed = 6
-    // intervalSpeed = 20
+    skipRock = skipCloud = skipBump = skipObstacle = 0
+    speed = 6
+    // speed = 20
     nodeDino.classList.add('dino-1')
     intervalDinoAnimation = setInterval(animateDino, 100)
     intervalScores = setInterval(runScore, 100)
-    groundScores = setInterval(runGround, intervalSpeed)
-    skyInterval = setInterval(runSky, intervalSpeed*5)
+    intervalGround = setInterval(runGround, speed)
+    intervalSky = setInterval(runSky, speed*5)
 }
 
 /**
@@ -121,10 +135,10 @@ function startNewGame() {
 function endGame() {
     clearInterval(intervalDinoAnimation)
     clearInterval(intervalScores)
-    clearInterval(jumpInterval)
-    clearInterval(squatInterval)
-    clearInterval(groundInterval)
-    clearInterval(skyInterval)
+    clearInterval(intervalJump)
+    clearInterval(intervalSquat)
+    clearInterval(intervalGround)
+    clearInterval(intervalSky)
 }
 
 // ***=== END OF GAME START AND END ===***
@@ -184,14 +198,13 @@ function drawStaticWorld() {
  * Makes Dino jump.
  */
 function jump() {
-    //FIXME: Fix jump speed.
     if (isInJump) return
     isInJump = true
 
     let dinoPosition = -18
     let movingUp = true
 
-    jumpInterval = setInterval(() => {
+    intervalJump = setInterval(() => {
         if (movingUp && dinoPosition < 120) return nodeDino.style.bottom = `${dinoPosition += 9}px`
         if (movingUp && dinoPosition < 168) return nodeDino.style.bottom = `${dinoPosition += 6}px`
         if (movingUp && dinoPosition < 174) return nodeDino.style.bottom = `${dinoPosition += 2}px`
@@ -204,7 +217,7 @@ function jump() {
         if (dinoPosition <= -18) {
             nodeDino.style.bottom = `-18px`
             isInJump = false
-            clearInterval(jumpInterval)
+            clearInterval(intervalJump)
         } 
     }, 10)
 }
@@ -216,16 +229,16 @@ function squat() {
 
     if (isInJump) {
         isInJump = false
-        clearInterval(jumpInterval)
+        clearInterval(intervalJump)
 
         let dinoPosition = nodeDino.style.bottom.slice(0, -2)
     
-        squatInterval = setInterval(() => {
+        intervalSquat = setInterval(() => {
             if (dinoPosition <= -9) {
                 nodeDino.style.bottom = `-50px`
                 isSquating = true
                 nodeDino.classList.add('dino-down-1')
-                return clearInterval(squatInterval)
+                return clearInterval(intervalSquat)
             }
             nodeDino.style.bottom = `${dinoPosition -= 9}px`
         }, 10)
@@ -279,11 +292,13 @@ function spawnRandomGround(isStatic) {
     let distanceBumps = isStatic ? 350 : 200
 
     // Minimum 5 + 1 to distanceRocks
-    groundCounter = groundCounter == 0 ? getRandom(distanceRocks) + 5 : --groundCounter
+    skipRock = skipRock == 0 ? getRandom(distanceRocks) + 5 : --skipRock
     // Minimum 150 + 1 to distanceBumps
-    bumpCounter = bumpCounter == 0 ? getRandom(distanceBumps) + 100 : --bumpCounter
+    skipBump = skipBump == 0 ? getRandom(distanceBumps) + 100 : --skipBump
+    // Minimum 100 + 1 to 200
+    skipObstacle = skipObstacle == 0 ? getRandom(200) + 100 : --skipObstacle
 
-    if (groundCounter && bumpCounter) return
+    if (skipRock && skipBump && skipObstacle) return
 
     let rockWidth = getRandom(10)
     let rockHeight = getRandom(3)
@@ -296,16 +311,28 @@ function spawnRandomGround(isStatic) {
     newGroundNode.style.top = `${rockTop}px`
     if (isStatic) newGroundNode.style.marginRight = `${marginRight}px`
 
-    if (!bumpCounter) {
+    if (!skipBump) {
         newGroundNode.style.top = `0`
         newGroundNode.style.height = `3px`
-        newGroundNode.style.visibility = 'visible'
         newGroundNode.classList.add('bump')
         let variant = getRandom(2)
         newGroundNode.classList.add(`bump-${variant}`)
     }
 
-    //TODO: A separate interval for bumps would be cool.
+    if (!skipObstacle && !isStatic) {
+        newGroundNode.style.top = `0`
+        newGroundNode.style.height = `3px`
+        newGroundNode.classList.add('obstacle')
+
+        let isBird = getRandom(5)
+        if (score > 300 && isBird > 3) {
+            newGroundNode.classList.add(`bird-2-1`)
+        }
+        else {
+            let variant = getRandom(6)
+            newGroundNode.classList.add(`cactus-${variant}`)
+        }
+    }
 
     nodeGround.appendChild(newGroundNode)
 
@@ -326,7 +353,7 @@ function moveRock(rock) {
  */
 function removeRock(rock) {
     let left = parseInt(rock.getBoundingClientRect().left)
-    if (left < -80) nodeGround.removeChild(rock)
+    if (left < -200) nodeGround.removeChild(rock)
 }
 
 // ***=== END OF GROUND ===***
@@ -358,9 +385,9 @@ function spawnRandomSky(isStatic) {
     let distance = isStatic ? 200 : 100
 
     // Minimum 40 + 1 to distance
-    skyCounter = skyCounter == 0 ? getRandom(distance) + 40 : --skyCounter
+    skipCloud = skipCloud == 0 ? getRandom(distance) + 40 : --skipCloud
 
-    if (skyCounter) return
+    if (skipCloud) return
 
     // One of the four different lines.
     let cloudTop = getRandom(4) * 20
@@ -391,7 +418,7 @@ function moveCloud(cloud) {
  */
 function removeCloud(cloud) {
     let left = parseInt(cloud.getBoundingClientRect().left)
-    if (left < -120) nodeSky.removeChild(cloud)
+    if (left < -100) nodeSky.removeChild(cloud)
 }
 
 // ***=== END OF SKY ===***

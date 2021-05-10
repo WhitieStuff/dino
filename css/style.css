@@ -106,8 +106,8 @@ body {
     display: inline-block;
     position: relative;
     top: -13px;
-    height: 18px;
-    width: 80px;
+    height: 15px;
+    width: 68px;
 }
 
 .bump-1::after {
@@ -137,7 +137,91 @@ body {
 .cloud::after {
     content: "";
     display: block;
-    width: 112px;
-    height: 31px;
+    width: 96px;
+    height: 27px;
     background: url(../images/cloud.png);
+}
+
+.obstacle {
+    display: inline-block;
+    height: 4px;
+    width: 5px;
+}
+
+.obstacle::after {
+    content: "";
+    display: block;
+    position: relative;
+    background-color: #0173c788;
+
+}
+
+.cactus-1::after {
+    background-image: url(../images/cactus-1.png);
+    width: 34px;
+    height: 71px;
+    top: -63px;
+}
+
+.cactus-2::after {
+    background-image: url(../images/cactus-2.png);
+    width: 68px;
+    height: 71px;
+    top: -63px;
+}
+
+.cactus-3::after {
+    background-image: url(../images/cactus-3.png);
+    width: 104px;
+    height: 71px;
+    top: -58px;
+}
+
+.cactus-4::after {
+    background-image: url(../images/cactus-4.png);
+    width: 51px;
+    height: 99px;
+    top: -91px;
+}
+
+.cactus-5::after {
+    background-image: url(../images/cactus-5.png);
+    width: 102px;
+    height: 99px;
+    top: -91px;
+}
+
+.cactus-6::after {
+    background-image: url(../images/cactus-6.png);
+    width: 151px;
+    height: 99px;
+    top: -91px;
+}
+
+.bird-1-1::after {
+    background-image: url(../images/bird-1.png);
+    width: 90px;
+    height: 57px;
+    top: -111px;
+}
+
+.bird-1-2::after {
+    background-image: url(../images/bird-2.png);
+    width: 90px;
+    height: 65px;
+    top: -111px;
+}
+
+.bird-2-1::after {
+    background-image: url(../images/bird-1.png);
+    width: 90px;
+    height: 57px;
+    top: -171px;
+}
+
+.bird-2-2::after {
+    background-image: url(../images/bird-2.png);
+    width: 90px;
+    height: 65px;
+    top: -171px;
 }
