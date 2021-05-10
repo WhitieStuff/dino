@@ -10,8 +10,7 @@
     src: url(../fonts/kongtext.ttf);
 }
 
-body {
-    /* width: 100vw; */
+.body {
     background: #f9f9f9;
     overflow: hidden;
 }

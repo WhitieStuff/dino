@@ -1,7 +1,12 @@
 /**
  * Main node.
  */
- let nodeMain = document.getElementById('main')
+let nodeMain = document.getElementById('main')
+
+/**
+ * Body node.
+ */
+let nodeBody = document.getElementById('body')
 
  document.addEventListener('keydown', event => {
      if (isGameStarted) {
@@ -121,9 +126,10 @@ let skipObstacle = 0
 function startNewGame() {
     obstacles[0] && nodeGround.removeChild(obstacles[0])
     nodeDino.style.bottom = `-18px`
+    toggleNight(false)
 
     isGameStarted = true
-    score = 0
+    // score = 0
     isInJump = false
     isSquating = false
     currentRockLength = 0
@@ -189,9 +195,10 @@ function runScore() {
         fullScore = "0" + fullScore
     }
     nodeCurrentScore.innerHTML = fullScore
+    if (!(fullScore % 700)) toggleNight(true)
+    if (!((fullScore - 200) % 700)) toggleNight(false)
 
     //TODO: Increase speed on hundreds.
-    //TODO: Night theme at 700 for next 200.
 }
 
 function drawStaticWorld() {
@@ -199,6 +206,21 @@ function drawStaticWorld() {
     for (let i = 0; i < rocks; i++) {
         spawnRandomGround(true)
         spawnRandomSky(true)
+    }
+}
+
+/**
+ * Toggles night.
+ * @param {boolean} night Is night.
+ */
+function toggleNight(night) {
+    if (night) {
+        nodeBody.style.filter = 'grayscale(1) invert(1)'
+        nodeBody.style.background = '#060606'
+    }
+    if (!night) {
+        nodeBody.style.filter = 'grayscale(0) invert(0)'
+        nodeBody.style.background = '#f9f9f9'
     }
 }
 
