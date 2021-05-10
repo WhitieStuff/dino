@@ -217,7 +217,6 @@ function jump() {
         if (movingUp && dinoPosition < 174) return nodeDino.style.bottom = `${dinoPosition += 2}px`
         if (movingUp && dinoPosition < 180) return nodeDino.style.bottom = `${dinoPosition++}px`
         movingUp = false
-        // if (pause) return pause--
         if (dinoPosition > 168) return nodeDino.style.bottom = `${dinoPosition -= 2}px`
         if (dinoPosition > 120) return nodeDino.style.bottom = `${dinoPosition -= 6}px`
         if (dinoPosition > -18) return nodeDino.style.bottom = `${dinoPosition -= 9}px`
@@ -281,6 +280,7 @@ function unsquat() {
  */
 function runGround() {
     spawnRandomGround()
+    checkObstacles()
 
     let firstRock = rocks[0]
     let lastRock = rocks[rocks.length - 1]
@@ -332,22 +332,16 @@ function spawnRandomGround(isStatic) {
         newGroundNode.classList.add('obstacle')
 
         let isBird = getRandom(5)
-        // if (score > 300 && isBird > 3) {
-        if (isBird > 3) {
+        if (score > 300 && isBird > 3) {
             let variant = getRandom(2)
             newGroundNode.style.top = variant > 1 ? `-171px` : `-111px`
             newGroundNode.classList.add(`bird-1`)
-            // newGroundNode.animation = setInterval(() => {
-            //     animateBird(newGroundNode)
-            // }, 6000)
         }
         else {
             newGroundNode.style.top = `0`
             let variant = getRandom(6)
             newGroundNode.classList.add(`cactus-${variant}`)
         }
-
-        // newGroundNode.watcher = setInterval(watchObstacle, speed)
     }
 
     nodeGround.appendChild(newGroundNode)
@@ -449,9 +443,55 @@ function removeCloud(cloud) {
 function animateBirds() {
     if (!birds.length) return
 
-    for (let i = 0; i < birds.length; i++) {
-        birds[i].classList.toggle('bird-2')
+    for (let i = 0; i < birds.length; i++) birds[i].classList.toggle('bird-2')
+}
+
+/**
+ * Checks ***all*** obstacles for touching Dino.
+ */
+function checkObstacles() {
+    if (!obstacles.length) return
+
+    for (let i = 0; i < obstacles.length; i++) {
+        checkTouch(obstacles[i])
     }
+}
+
+/**
+ * Checks ***the given*** obstacle for touching Dino.
+ * @param {Element} obstacle The given obstacle to check touch.
+ */
+function checkTouch(obstacle) {
+    // Ground level if -18px from sky.
+    let isCactus = obstacle.className.includes('cactus')
+    let isBird = obstacle.className.includes('bird')
+
+    let dinoLeft = 50
+    let dinoRight = 133
+    let dinoBottom = parseInt(getComputedStyle(nodeDino).bottom.slice(0, -2))
+    let dinoTop = dinoBottom + 88
+
+    // -150 because Dino is moving during the calculation.
+    let obstacleLeft = parseInt(obstacle.offsetLeft) - 150
+    let obstacleRight = parseInt(getComputedStyle(obstacle, "::after").width.slice(0, -2)) + obstacleLeft
+    let obstacleTop = parseInt(getComputedStyle(obstacle, "::after").height.slice(0, -2)) - 18
+
+    //FIXME: Right edge.
+    
+    let isTouchingHorizontal = obstacleLeft <= dinoRight && obstacleRight > dinoLeft ? true : false
+    let isTouchingVertical = false
+
+    if (isTouchingHorizontal) {
+        if (isCactus) {
+            isTouchingVertical = obstacleTop > dinoBottom
+        }
+    }
+
+    let isTouching = isTouchingHorizontal && isTouchingVertical
+    // let obstacle
+    // let right
+    if (isTouching) return endGame()
+    // console.log(dinoBottom)
 }
 
 // ***=== END OF OBSTACLES ===***

@@ -161,14 +161,14 @@ body {
     background-image: url(../images/cactus-1.png);
     width: 34px;
     height: 71px;
-    top: -63px;
+    top: -58px;
 }
 
 .cactus-2::after {
     background-image: url(../images/cactus-2.png);
     width: 68px;
     height: 71px;
-    top: -63px;
+    top: -58px;
 }
 
 .cactus-3::after {
@@ -182,21 +182,21 @@ body {
     background-image: url(../images/cactus-4.png);
     width: 51px;
     height: 99px;
-    top: -91px;
+    top: -86px;
 }
 
 .cactus-5::after {
     background-image: url(../images/cactus-5.png);
     width: 102px;
     height: 99px;
-    top: -91px;
+    top: -86px;
 }
 
 .cactus-6::after {
     background-image: url(../images/cactus-6.png);
     width: 151px;
     height: 99px;
-    top: -91px;
+    top: -86px;
 }
 
 .bird-1::after {
