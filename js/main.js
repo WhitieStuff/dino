@@ -56,6 +56,11 @@ let nodeObstacles = document.getElementById('obstacles')
 let obstacles = document.getElementsByClassName('obstacle')
 
 /**
+ * Collection of birds nodes.
+ */
+let birds = document.getElementsByClassName('bird-1')
+
+/**
  * Time for the interval.
  */
 let speed
@@ -83,7 +88,7 @@ let score = 0
 /**
  * Intervals.
  */
-let intervalDinoAnimation, intervalScores, intervalJump, intervalSquat, intervalGround, intervalSky
+let intervalDinoAnimation, intervalScores, intervalJump, intervalSquat, intervalGround, intervalSky, intervalBirds
 
 /**
  * If < 1 then draws a rock.
@@ -126,7 +131,8 @@ function startNewGame() {
     intervalDinoAnimation = setInterval(animateDino, 100)
     intervalScores = setInterval(runScore, 100)
     intervalGround = setInterval(runGround, speed)
-    intervalSky = setInterval(runSky, speed*5)
+    intervalSky = setInterval(runSky, 30)
+    intervalBirds = setInterval(animateBirds, 350)
 }
 
 /**
@@ -139,6 +145,7 @@ function endGame() {
     clearInterval(intervalSquat)
     clearInterval(intervalGround)
     clearInterval(intervalSky)
+    clearInterval(intervalBirds)
 }
 
 // ***=== END OF GAME START AND END ===***
@@ -320,18 +327,27 @@ function spawnRandomGround(isStatic) {
     }
 
     if (!skipObstacle && !isStatic) {
-        newGroundNode.style.top = `0`
-        newGroundNode.style.height = `3px`
+        newGroundNode.style.height = `0`
+        newGroundNode.style.width = `0`
         newGroundNode.classList.add('obstacle')
 
         let isBird = getRandom(5)
-        if (score > 300 && isBird > 3) {
-            newGroundNode.classList.add(`bird-2-1`)
+        // if (score > 300 && isBird > 3) {
+        if (isBird > 3) {
+            let variant = getRandom(2)
+            newGroundNode.style.top = variant > 1 ? `-171px` : `-111px`
+            newGroundNode.classList.add(`bird-1`)
+            // newGroundNode.animation = setInterval(() => {
+            //     animateBird(newGroundNode)
+            // }, 6000)
         }
         else {
+            newGroundNode.style.top = `0`
             let variant = getRandom(6)
             newGroundNode.classList.add(`cactus-${variant}`)
         }
+
+        // newGroundNode.watcher = setInterval(watchObstacle, speed)
     }
 
     nodeGround.appendChild(newGroundNode)
@@ -425,7 +441,22 @@ function removeCloud(cloud) {
 
 // *****=====*****
 
+// ***=== START OF OBSTACLES ===***
 
+/**
+ * Animates all birds.
+ */
+function animateBirds() {
+    if (!birds.length) return
+
+    for (let i = 0; i < birds.length; i++) {
+        birds[i].classList.toggle('bird-2')
+    }
+}
+
+// ***=== END OF OBSTACLES ===***
+
+// *****=====*****
 
 
 drawStaticWorld()

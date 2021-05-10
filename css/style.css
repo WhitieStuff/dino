@@ -146,6 +146,7 @@ body {
     display: inline-block;
     height: 4px;
     width: 5px;
+    z-index: 900;
 }
 
 .obstacle::after {
@@ -198,30 +199,15 @@ body {
     top: -91px;
 }
 
-.bird-1-1::after {
+.bird-1::after {
     background-image: url(../images/bird-1.png);
     width: 90px;
     height: 57px;
-    top: -111px;
 }
 
-.bird-1-2::after {
+.bird-2::after {
     background-image: url(../images/bird-2.png);
     width: 90px;
     height: 65px;
-    top: -111px;
-}
-
-.bird-2-1::after {
-    background-image: url(../images/bird-1.png);
-    width: 90px;
-    height: 57px;
-    top: -171px;
-}
-
-.bird-2-2::after {
-    background-image: url(../images/bird-2.png);
-    width: 90px;
-    height: 65px;
-    top: -171px;
+    top: 12px;
 }
