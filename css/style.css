@@ -13,6 +13,13 @@
 .body {
     background: #f9f9f9;
     overflow: hidden;
+    -webkit-touch-callout: none; /* iOS Safari */
+      -webkit-user-select: none; /* Safari */
+       -khtml-user-select: none; /* Konqueror HTML */
+         -moz-user-select: none; /* Old versions of Firefox */
+          -ms-user-select: none; /* Internet Explorer/Edge */
+              user-select: none; /* Non-prefixed version, currently
+                                    supported by Chrome, Edge, Opera and Firefox */
 }
 
 .main {
@@ -23,6 +30,18 @@
     border-bottom: 3px solid #0173c7;
     color: #0173c7;
     font-family: "Kongtext";
+}
+
+.scores {
+    position: absolute;
+    text-align: right;
+    bottom: 200px;
+    right: 50px;
+    font-size: 36px;
+}
+
+.score_high, .score_title {
+    color: #519FD8;
 }
 
 .dino {
@@ -58,20 +77,6 @@
 .dino-down-2 {
     background-image: url(../images/dino-down-2.png);
     width: 110px;
-}
-
-.scores {
-    position: absolute;
-    text-align: right;
-    bottom: 200px;
-    right: 50px;
-    font-size: 36px;
-}
-
-.score_high, .score_title {
-    /* opacity: .6; */
-    /* color: #5495c4; */
-    color: #519FD8;
 }
 
 .ground {
@@ -207,4 +212,23 @@
     width: 90px;
     height: 65px;
     top: 12px;
+}
+
+.gameover {
+    position: absolute;
+    bottom: 30px;
+    width: 100%;
+    text-align: center;
+    font-size: 36px;
+    visibility: hidden;
+    z-index: 10000;
+}
+
+.gameover::after {
+    content: "";
+    display: block;
+    width: 89px;
+    height: 79px;
+    margin: 20px auto;
+    background: url(../images/retry.png) no-repeat;
 }

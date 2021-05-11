@@ -8,11 +8,24 @@ let nodeMain = document.getElementById('main')
  */
 let nodeBody = document.getElementById('body')
 
+/**
+ * Gameover node.
+ */
+let nodeGameover = document.getElementById('gameover')
+
+/**
+ * If true, it takes one more space to make it go.
+ */
+let isGameover = false
+
  document.addEventListener('keydown', event => {
      if (isGameStarted) {
         if (event.code == "ArrowUp" || event.code == "Space") jump()
         if (event.code == "ArrowDown") squat()
-     } else if (event.code == "ArrowUp" || event.code == "Space") startNewGame()
+     } else if (event.code == "ArrowUp" || event.code == "Space") {
+        if (isGameover) return isGameover = false
+        startNewGame()
+     }
 
  })
 
@@ -29,6 +42,11 @@ let nodeDino = document.getElementById('dino')
  * Node of the current score.
  */
  let nodeCurrentScore = document.getElementById('score_current')
+
+/**
+ * Node of the highscore.
+ */
+ let nodeHighScore = document.getElementById('score_high')
 
 /**
  * Node of the ground.
@@ -66,9 +84,9 @@ let obstacles = document.getElementsByClassName('obstacle')
 let birds = document.getElementsByClassName('bird-1')
 
 /**
- * Time for the interval.
+ * Speed of the current game. Actually the size of margin-right of the last rock.
  */
-let speed
+let speed = 4
 
 /**
  * True if the game is started.
@@ -89,6 +107,12 @@ let isSquating
  * Score in the current game.
  */
 let score = 0
+
+/**
+ * The highscore.
+ */
+let highScore = localStorage.getItem('highscore') ? localStorage.getItem('highscore') : 0
+
 
 /**
  * Intervals.
@@ -124,22 +148,23 @@ let skipObstacle = 0
  * Starts a new game.
  */
 function startNewGame() {
+    nodeGameover.style.visibility = 'hidden'
     obstacles[0] && nodeGround.removeChild(obstacles[0])
     nodeDino.style.bottom = `-18px`
     toggleNight(false)
 
     isGameStarted = true
-    // score = 0
+    score = 0
     isInJump = false
     isSquating = false
     currentRockLength = 0
     
     skipRock = skipCloud = skipBump = skipObstacle = 0
-    speed = 6
+    speed = 4
     nodeDino.classList.add('dino-1')
     intervalDinoAnimation = setInterval(animateDino, 100)
     intervalScores = setInterval(runScore, 100)
-    intervalGround = setInterval(runGround, speed)
+    intervalGround = setInterval(runGround, 6)
     intervalSky = setInterval(runSky, 30)
     intervalBirds = setInterval(animateBirds, 350)
 }
@@ -155,9 +180,10 @@ function endGame() {
     clearInterval(intervalGround)
     clearInterval(intervalSky)
     clearInterval(intervalBirds)
-    isGameStarted = false
 
-    //TODO: Save highscore.
+    isGameStarted = false
+    nodeGameover.style.visibility = 'visible'
+    isGameover = true
 }
 
 // ***=== END OF GAME START AND END ===***
@@ -190,15 +216,37 @@ function animateDino() {
  * Runs the score counter.
  */
 function runScore() {
-    let fullScore = ++score
-    while (fullScore.toString().length < 5) {
-        fullScore = "0" + fullScore
-    }
-    nodeCurrentScore.innerHTML = fullScore
-    if (!(fullScore % 700)) toggleNight(true)
-    if (!((fullScore - 200) % 700)) toggleNight(false)
+    writeFullScore(++score, nodeCurrentScore)
+      
+    if (!(score % 700)) toggleNight(true)
+    if (!((score - 200) % 700)) toggleNight(false)
 
-    //TODO: Increase speed on hundreds.
+    if (score > highScore) {
+        highScore = score
+        localStorage.setItem('highscore', highScore)
+        writeFullScore(highScore, nodeHighScore)
+    }
+
+    /**
+     * Positions that the speed changes at.
+     */
+    let speedShifts = [150, 300, 450, 600]
+
+    if (speedShifts.includes(score)) speed++
+}
+
+/**
+ * Writes the given score to the given node with nulls.
+ * 5 ==> 00005
+ * @param {number} score The given score (e.g. 5).
+ * @param {Element} node The node to put the score in.
+ * @returns {string} The score with nulls (e.g. 00005).
+ */
+function writeFullScore(score, node) {
+    while (score.toString().length < 5) {
+        score = "0" + score
+    }
+    node.innerHTML = score
 }
 
 function drawStaticWorld() {
@@ -324,14 +372,18 @@ function runGround() {
 function spawnRandomGround(isStatic) {
     // If not static, we need to decrease the initial distanse because the right margin grows when moving. 
     let distanceRocks = isStatic ? 5 : 2
+    // Minimum distance between rocks, decreases when speed increases.
+    let distanceRocksMin = 9 - speed
     let distanceBumps = isStatic ? 350 : 200
 
     // Minimum 5 + 1 to distanceRocks
-    skipRock = skipRock == 0 ? getRandom(distanceRocks) + 5 : --skipRock
+    skipRock = skipRock == 0 ? getRandom(distanceRocks) + distanceRocksMin : --skipRock
     // Minimum 150 + 1 to distanceBumps
     skipBump = skipBump == 0 ? getRandom(distanceBumps) + 100 : --skipBump
+
+    let distanceObstacle = speed > 7 ? 80 : 110
     // Minimum 100 + 1 to 200
-    skipObstacle = skipObstacle == 0 ? getRandom(200) + 100 : --skipObstacle
+    skipObstacle = skipObstacle == 0 ? getRandom(distanceObstacle * 2) + distanceObstacle : --skipObstacle
 
     if (skipRock && skipBump && skipObstacle) return
 
@@ -381,7 +433,8 @@ function spawnRandomGround(isStatic) {
  * @param {Element} rock The rock to increase margin. 
  */
 function moveRock(rock) {
-    let newMargin = parseInt(getComputedStyle(rock)['margin-right'].slice(0, -2)) + 4
+    // Speed is set in startNewGame() and increases during the game so the speed increases.
+    let newMargin = parseInt(getComputedStyle(rock)['margin-right'].slice(0, -2)) + speed
     rock.style['margin-right'] = `${newMargin}px`
 }
 
@@ -543,3 +596,8 @@ function checkTouch(obstacle) {
 
 
 drawStaticWorld()
+writeFullScore(highScore, nodeHighScore)
+
+window.oncontextmenu = function () {
+    return false
+}
