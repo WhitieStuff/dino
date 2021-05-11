@@ -19,21 +19,20 @@ let nodeGameover = document.getElementById('gameover')
 let isGameover = false
 
  document.addEventListener('keydown', event => {
-     if (isGameStarted) {
+    if (isGameStarted) {
         if (event.code == "ArrowUp" || event.code == "Space") jump()
         if (event.code == "ArrowDown") squat()
-     } else if (event.code == "ArrowUp" || event.code == "Space") {
+    } else if (event.code == "ArrowUp" || event.code == "Space") {
         if (isGameover) return isGameover = false
         startNewGame()
-     }
+    }
+})
 
- })
-
- document.addEventListener('keyup', event => {
-     if (isGameStarted && event.code == "ArrowDown") unsquat()
- })
+document.addEventListener('keyup', event => {
+    if (isGameStarted && event.code == "ArrowDown") unsquat()
+})
  
- /**
+/**
  * Node of Dino itself.
  */
 let nodeDino = document.getElementById('dino')
@@ -41,12 +40,12 @@ let nodeDino = document.getElementById('dino')
 /**
  * Node of the current score.
  */
- let nodeCurrentScore = document.getElementById('score_current')
+let nodeCurrentScore = document.getElementById('score_current')
 
 /**
  * Node of the highscore.
  */
- let nodeHighScore = document.getElementById('score_high')
+let nodeHighScore = document.getElementById('score_high')
 
 /**
  * Node of the ground.
@@ -91,12 +90,12 @@ let speed = 4
 /**
  * True if the game is started.
  */
- let isGameStarted
+let isGameStarted
 
 /**
  * True if Dino is in jump.
  */
- let isInJump
+let isInJump
 
 /**
  * True if Dino is squating.
@@ -122,7 +121,7 @@ let intervalDinoAnimation, intervalScores, intervalJump, intervalSquat, interval
 /**
  * If < 1 then draws a rock.
  */
- let skipRock = 0
+let skipRock = 0
 
 /**
  * If < 1 then spawns a bump.
@@ -217,7 +216,7 @@ function animateDino() {
  */
 function runScore() {
     writeFullScore(++score, nodeCurrentScore)
-      
+     
     if (!(score % 700)) toggleNight(true)
     if (!((score - 200) % 700)) toggleNight(false)
 
