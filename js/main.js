@@ -110,7 +110,7 @@ let score = 0
 /**
  * The highscore.
  */
-let highScore = localStorage.getItem('highscore') ? localStorage.getItem('highscore') : 0
+let highScore = localStorage.getItem('highscore') || 0
 
 
 /**
